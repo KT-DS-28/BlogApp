@@ -1,0 +1,36 @@
+# Claude Code
+.claude/
+CLAUDE.md
+.remember/
+graphify-out/
+
+# Serena
+.serena/
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+.metadata/
+*.launch
+
+# VS Code
+.vscode/
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes

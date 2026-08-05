@@ -1,0 +1,18 @@
+# 저장소에는 항상 LF로 저장한다 (체크아웃 시 OS 기본 방식 유지)
+* text=auto eol=lf
+
+# 텍스트로 명시
+*.java   text
+*.md     text
+*.txt    text
+*.xml    text
+.gitignore     text
+.gitattributes text
+
+# 바이너리 (줄바꿈 변환 금지)
+*.class  binary
+*.jar    binary
+*.png    binary
+*.jpg    binary
+*.gif    binary
+*.pdf    binary
