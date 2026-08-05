@@ -34,3 +34,6 @@ $RECYCLE.BIN/
 ._*
 .Spotlight-V100
 .Trashes
+
+# dosc
+.dosc/LEAD_NOTE.md
