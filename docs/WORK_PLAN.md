@@ -1,5 +1,5 @@
 # BlogApp 진행 순서 (A팀)
-
+https://app.notion.com/invite/b74fe746a7f92569d04b0d32ab1afa8ff067aa55
 > 순수 Java 콘솔 앱 / 메모리 저장 / 6인
 
 ---
