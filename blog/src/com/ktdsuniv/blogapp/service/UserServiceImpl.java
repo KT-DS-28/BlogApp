@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ktdsuniv.blogapp.domain.User;
+import com.ktdsuniv.blogapp.exception.BlogException;
+import com.ktdsuniv.blogapp.exception.DuplicateUserIdException;
+import com.ktdsuniv.blogapp.util.ScannerUtil;
 
 /**
  * 사용자 기능 구현. 구현 방법은 docs/IMPLEMENTATION_GUIDE.md 참고.
@@ -21,6 +24,30 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void register() {
 		// TODO 이한결
+		String id = ScannerUtil.nextLine("아이디:").trim();
+		if(id == null || id.isBlank()) {
+			throw new BlogException("아이디는 필수로 입력해야합니다");
+		}
+		if (findById(id) !=null) {
+			throw new DuplicateUserIdException();
+		}
+		
+		String password = ScannerUtil.nextLine("password:").trim();
+		if (password == null || password.isBlank()) {
+			throw new BlogException("비밀번호는 필수로 입력해야 합니다.");
+		}
+		
+		String name = ScannerUtil.nextLine("이름:").trim();
+		if (name == null || name.isBlank()) {
+			throw new BlogException("이름은 필수로 입력해야 합니다.");
+		}
+		
+		String blogName = ScannerUtil.nextLine("블로그 제목:").trim();
+		if (blogName == null || blogName.isBlank()) {
+			throw new BlogException("블로그 명은 필수로 입력해야 합니다.");
+		}
+		User newUser = new User(id, password, name, blogName);
+		USERS.add(newUser);
 	}
 
 	@Override
@@ -43,6 +70,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public User findById(String id) {
 		// TODO 이한결
+		for(User user:USERS) {
+			if(user.getId().equals(id)) {
+				return user;
+			}
+		}
 		return null;
 	}
 
