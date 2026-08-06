@@ -6,7 +6,11 @@ import java.util.List;
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.BlogException;
 import com.ktdsuniv.blogapp.exception.DuplicateUserIdException;
+import com.ktdsuniv.blogapp.exception.LoginBlockedException;
+import com.ktdsuniv.blogapp.exception.NotFoundException;
+import com.ktdsuniv.blogapp.exception.NotLoggedInException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
+import com.ktdsuniv.blogapp.util.Session;
 
 /**
  * 사용자 기능 구현. 구현 방법은 docs/IMPLEMENTATION_GUIDE.md 참고.
@@ -53,11 +57,59 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void login() {
 		// TODO 최미서
+
+		//아이디 비밀번호 입력 받기
+		String id = ScannerUtil.nextLine("아이디:").trim();
+		
+		User user = findById(id);
+		
+		// 사용자의 아이디가 없다면
+		if(user == null) {
+			throw new NotFoundException("사용자");
+		} 
+		
+		String password = null;
+		
+		for (int i = 0; i < 10; i++) {
+			password= ScannerUtil.nextLine("비밀번호:").trim();
+			// 사용자의 비밀번호가 일치
+			 if (user.getPassword().equals(password)) {
+				 	//세션에 유저정보 저장
+					Session.login(user);
+					// 로그인 시도횟수 초기화
+					user.resetLoginTryCount();
+					System.out.println(user.getName() + "로그인 되었습니다.");
+					return;
+				// 비밀번호가 일치 하지않는다.
+				} else {
+					// 로그인 시도횟수 증가
+					user.increaseLoginTryCount();
+					System.out.println("비밀번호가 올바르지 않습니다. "
+							+ "(남은 시도 " +(10 - user.getLoginTryCount())  + "회)");
+				}
+			 
+		}
+		// 로그인시도 횟수가 10회 이상이라면
+		if(user.isLoginBlocked()) {
+			// 로그인 시도횟수 초기화
+			user.resetLoginTryCount();
+			throw new LoginBlockedException();	
+		}
+		
+		
+		
 	}
 
 	@Override
 	public void logout() {
 		// TODO 최미서
+		// 사용자가 로그인이 되어있다면
+		if(Session.isLoggedIn()) {
+			Session.logout();
+			System.out.println("로그아웃 되었습니다.");
+		} else {
+			throw new NotLoggedInException();
+		}
 	}
 
 	@Override
