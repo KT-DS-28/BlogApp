@@ -13,7 +13,6 @@ import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
 
 /**
- * 사용자 기능 구현. 구현 방법은 docs/IMPLEMENTATION_GUIDE.md 참고.
  *
  * 메뉴 기능은 입력 -> 처리 -> 출력을 모두 담당한다.
  * 자기 담당 메서드 안에서만 작업하고 다른 메서드의 위치나 순서를 바꾸지 말 것. (Git 충돌 방지)
@@ -115,6 +114,22 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void withdraw() {
 		// TODO 최형선
+
+		// 로그인한 사용자 정보는 Session 이 가지고 있다.
+		User user = Session.getLoginUser();
+		
+		// 유저 삭제 후에 출력 메시지를 위한 임시 변수.
+		String userName = user.getName();
+		
+		// getLoginUser 에서 NotLoggedInException 에서 이미 처리중이기때문에 
+		// 로그인 하지 않은 상황에 대한 추가 예외처리를 하지 않아도 된다.
+		USERS.remove(user);
+		
+		// 탈퇴 메시지 출력.
+		System.out.println(userName+"님 탈퇴 처리 되었습니다.");
+		
+		// 유저 삭제 이후에 로그 아웃 처리한다.
+		Session.logout();
 	}
 
 	// ============ 다른 기능에서 사용하는 조회 ============
