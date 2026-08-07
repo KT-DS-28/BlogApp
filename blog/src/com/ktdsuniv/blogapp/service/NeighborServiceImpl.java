@@ -2,11 +2,14 @@ package com.ktdsuniv.blogapp.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import com.ktdsuniv.blogapp.domain.Neighbor;
 import com.ktdsuniv.blogapp.domain.User;
+import com.ktdsuniv.blogapp.enums.NeighborState;
 import com.ktdsuniv.blogapp.exception.BlogException;
 import com.ktdsuniv.blogapp.exception.NotFoundException;
+import com.ktdsuniv.blogapp.exception.NotLoggedInException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
 
@@ -77,6 +80,39 @@ public class NeighborServiceImpl implements NeighborService {
 	@Override
 	public void handleRequest() {
 		// TODO 엄예진
+		if (!Session.isLoggedIn()) {
+			throw new NotLoggedInException();
+		}
+		User user = Session.getLoginUser();
+		
+		List<Neighbor> pendingNeighbors = new ArrayList<>();
+		for (Neighbor neighbor : user.getNeighbors()) {
+			if(user == neighbor.getReceiver() && neighbor.getState() == NeighborState.PENDING) {
+				pendingNeighbors.add(neighbor);
+			}
+		}
+		if (pendingNeighbors.size() == 0) {
+			System.out.println("이웃 신청 목록이 비어있습니다.");
+			return;
+		}
+		
+		Neighbor neighbor = null;
+		for (int  i = 0; i < pendingNeighbors.size(); i++) {
+			neighbor = pendingNeighbors.get(i);
+			System.out.println(i + ". 이웃 신청: " + neighbor.getRequester().getName());
+		}
+		
+		System.out.println("이웃을 맺고 싶은 번호를 입력하세요.");
+		int acceptNumber = ScannerUtil.nextInt("이웃 수락 번호: ");
+		if (acceptNumber < 0 || acceptNumber > pendingNeighbors.size() - 1) {
+			System.out.println("잘못된 번호입니다.");
+			return;
+		}
+		
+		Neighbor AcceptNeighbor = pendingNeighbors.get(acceptNumber);
+		AcceptNeighbor.setState(NeighborState.ACCEPTED);
+		System.out.println("이웃을 맺었습니다.");
+		
 	}
 
 	@Override
