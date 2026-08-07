@@ -1,5 +1,8 @@
 package com.ktdsuniv.blogapp.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.BlogException;
 import com.ktdsuniv.blogapp.exception.DuplicateUserIdException;
@@ -8,11 +11,8 @@ import com.ktdsuniv.blogapp.exception.NotFoundException;
 import com.ktdsuniv.blogapp.exception.NotLoggedInException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * 사용자 기능 구현. 구현 방법은 docs/IMPLEMENTATION_GUIDE.md 참고.
  *
  * 메뉴 기능은 입력 -> 처리 -> 출력을 모두 담당한다.
  * 자기 담당 메서드 안에서만 작업하고 다른 메서드의 위치나 순서를 바꾸지 말 것. (Git 충돌 방지)
