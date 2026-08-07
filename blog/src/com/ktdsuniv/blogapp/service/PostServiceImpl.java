@@ -6,6 +6,7 @@ import java.util.List;
 import com.ktdsuniv.blogapp.domain.Post;
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.BlogException;
+import com.ktdsuniv.blogapp.exception.NotLoggedInException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
 
@@ -55,7 +56,55 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public void publish() {
 		// TODO 이한결
-	}
+		if (!Session.isLoggedIn()) {
+			throw new NotLoggedInException();
+		}
+		User user = Session.getLoginUser();
+		 
+		List<Post> posts = user.getPostList(); 
+		if (posts.isEmpty()) {
+			System.out.println("작성한 게시글이 없습니다.");
+			return;
+		}
+		
+		Post post = null;
+		boolean exist = false;
+		for (int i = 0; i < posts.size(); i++) {
+			post = posts.get(i);
+			
+			if (!post.isPublished()) {
+				 System.out.println("미발행된 게시글입니다.");
+				 System.out.println(i + ". " + post.getTitle());
+			     System.out.println("미발행 게시글 번호를 선택하세요.");
+			     exist=true;
+			}
+			
+			if (!exist) {
+				System.out.println("미발행 게시글이 없습니다.");
+		         return;
+			}
+			
+			System.out.println("발행할 게시글을 번호로 입력하세요.");
+			int postNumber = ScannerUtil.nextInt("게시글 번호: ");
+			
+			if (postNumber < 0 || postNumber > posts.size()) {
+				System.out.println("존재하지 않는 게시글 번호입니다.");
+				return; 
+			}
+				
+			post = posts.get(postNumber);
+			
+			if (post.isPublished()) {
+				System.out.println("이미 발행된 게시글입니다.");
+				return;
+			}
+			
+			post.publish();
+			System.out.println("게시글이 발행되었습니다.");
+			}
+			     
+		 }
+
 
 	@Override
 	public void like() {
