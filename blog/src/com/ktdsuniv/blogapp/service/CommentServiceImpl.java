@@ -30,6 +30,9 @@ public class CommentServiceImpl implements CommentService {
 		int postNumber = ScannerUtil.nextInt("게시물을 선택하세요.: ");
 		Post post = postService.getPost(author, postNumber);
 // 댓글 개수
+		if(post.getComments().isEmpty()) {
+			throw new BlogException("내용은 필수로 입력해야 합니다.");
+		}
 		postService.showPostDetail();
 		int commentNumber = ScannerUtil.nextInt("수정할 댓글을 선택하세요.: ");
 		Comment comment = post.getComments().get(commentNumber);
