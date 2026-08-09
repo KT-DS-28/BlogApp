@@ -17,7 +17,6 @@ import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
 
 /**
- *
  * 메뉴 기능은 입력 -> 처리 -> 출력을 모두 담당한다.
  * 자기 담당 메서드 안에서만 작업하고 다른 메서드의 위치나 순서를 바꾸지 말 것. (Git 충돌 방지)
  */

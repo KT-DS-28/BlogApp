@@ -15,7 +15,6 @@ import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
 
 /**
- * 이웃 기능 구현. 구현 방법은 docs/IMPLEMENTATION_GUIDE.md 참고.
  *
  * 이 파일은 4명이 나눠 쓴다. 자기 담당 메서드 안에서만 작업하고 다른 메서드의 위치나 순서를 바꾸지 말 것. (Git 충돌 방지)
  */
