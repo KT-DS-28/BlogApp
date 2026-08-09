@@ -114,9 +114,24 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public List<Post> getPostList(User blogOwner) {
 		// TODO 김경환
-		return new ArrayList<>();
+		User loginUser = Session.getLoginUser();
+		List<Post> allPosts = blogOwner.getPostList();
+		// 본인이 자기 블로그를 보는 경우 -> 전체 반환 
+		if (loginUser != null && loginUser.equals(blogOwner)) {
+			return allPosts;
+		} else {
+		// 본인이 아닌 경우 -> 발행된 글만 반환 
+		List<Post> result = new ArrayList<>();
+		for (int i = 0; i< allPosts.size(); i++) {
+			Post post = allPosts.get(i);
+			if (post.isPublished()) {
+				result.add(post);
+			}
+		}
+		return result;
 	}
-
+}
+	
 	@Override
 	public Post getPost(User blogOwner, int index) {
 		// TODO 엄예진
