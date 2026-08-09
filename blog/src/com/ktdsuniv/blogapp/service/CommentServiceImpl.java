@@ -1,5 +1,7 @@
 package com.ktdsuniv.blogapp.service;
 
+import java.util.List;
+
 import com.ktdsuniv.blogapp.domain.Comment;
 import com.ktdsuniv.blogapp.domain.Post;
 import com.ktdsuniv.blogapp.domain.User;
@@ -23,6 +25,46 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public void addComment() {
 		// TODO 최미서
+		// 로그인 여부 확인
+		User loginUser = Session.getLoginUser();
+		// 전체 사용자 목록 조회
+		List<User> users = userService.getAllUsers();
+		// 전체 사용자 출력
+		for (int i = 0; i < users.size(); i++) {
+			System.out.println(i + ". " + users.get(i).getBlogName());
+		}
+		// 블로그 사용자 주인 선택
+		int userIndex = ScannerUtil.nextInt("블로그 번호: ");
+
+		// 알맞은 블로그를 선택했는지 확인
+		if (userIndex < 0 || userIndex >= users.size()) {
+			throw new BlogException("존재하지 않는 블로그입니다.");
+		}
+
+		User blogOwner = users.get(userIndex);
+		// 블로그 사용자의 게시물 리스트 조회
+		List<Post> posts = postService.getPostList(blogOwner);
+		// 블로그 사용자의 게시글 제목 출력
+		for (int i = 0; i < posts.size(); i++) {
+			System.out.println(i + "." + posts.get(i).getTitle());
+		}
+		// 게시글 번호 선택
+		int postIndex = ScannerUtil.nextInt("게시글 번호: ");
+
+		// 선택한 게시글 들고오기
+		Post post = postService.getPost(blogOwner, postIndex);
+		// 댓글 입력받기
+		String content = ScannerUtil.nextLine("댓글 내용: ").trim();
+		// 댓글이 없을 경우
+		if (content.isBlank()) {
+			throw new BlogException("댓글 내용은 필수로 입력해야 합니다.");
+		}
+
+		// 댓글 생성
+		Comment comment = new Comment(loginUser, content);
+		// 댓글 추가
+		post.getComments().add(comment);
+		System.out.println("댓글이 등록되었습니다.");
 	}
 
 	@Override
