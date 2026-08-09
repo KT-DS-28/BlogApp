@@ -9,6 +9,7 @@ import com.ktdsuniv.blogapp.exception.AccessDeniedException;
 import com.ktdsuniv.blogapp.exception.BlogException;
 import com.ktdsuniv.blogapp.exception.LikedCommentException;
 import com.ktdsuniv.blogapp.exception.NotFoundException;
+import com.ktdsuniv.blogapp.exception.NotLoggedInException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
 
@@ -69,6 +70,9 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public void updateComment() {
+		if (!Session.isLoggedIn()) {
+			throw new NotLoggedInException();
+		}
 		User loginUser = Session.getLoginUser();
 
 		postService.showPostList();
