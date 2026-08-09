@@ -47,34 +47,27 @@ public class NeighborServiceImpl implements NeighborService {
 					+ currUser.getBlogName());
 			// (1) ID: " ", 이름: " ", 블로그명: " "
 		}
-//		System.out.println(userList);
-
 		// 신청 대상 아이디 입력받기
 		String receiverId = ScannerUtil.nextLine("이웃신청할 아이디").trim();
 		if (receiverId == null || receiverId.isBlank()) {
 			throw new BlogException("아이디는 필수로 입력해야합니다");
 		}
-		if (receiverId == requester.getId()) {
-			throw new BlogException("");
+		if (receiverId.equals(requester.getId())) {
+			throw new BlogException("본인에게는 이웃 신청을 할 수 없습니다.");
 		}
 		// 신청 대상 아이디로 user 가져오기 
 		User receiver = userService.findById(receiverId);
 		if (receiver == null) {
 			throw new NotFoundException("존재하지 않는 아이디입니다");
 		}
-//
-//		// 자기 자신 체크
-//
-//		// 중복 신청 체크
-//
 		// 이웃 인스턴스 하나 생성
-		Neighbor neighbor = new Neighbor(requester, receiver); // 이웃 인스턴스 하나 생성
-//
-//		// 양쪽 리스트에 같은 객체 추가
+		Neighbor neighbor = new Neighbor(requester, receiver);
+		
+		// 양쪽 리스트에 같은 객체 추가
 		requester.getNeighbors().add(neighbor);
 		receiver.getNeighbors().add(neighbor);
-//		// 완료 메세지
-		
+		// 완료 메세지
+		System.out.println(receiver.getName() + "님에게 이웃 신청을 보냈습니다.");
 	}
 
 	@Override
