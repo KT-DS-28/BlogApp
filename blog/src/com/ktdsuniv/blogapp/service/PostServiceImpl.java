@@ -78,34 +78,32 @@ public class PostServiceImpl implements PostService {
 			     System.out.println("미발행 게시글 번호를 선택하세요.");
 			     exist=true;
 			}
+		}
 			
-			if (!exist) {
-				System.out.println("미발행 게시글이 없습니다.");
-		         return;
-			}
+		if (!exist) {
+			System.out.println("미발행 게시글이 없습니다.");
+			return;
+		}
 			
-			System.out.println("발행할 게시글을 번호로 입력하세요.");
-			int postNumber = ScannerUtil.nextInt("게시글 번호: ");
+		System.out.println("발행할 게시글을 번호로 입력하세요.");
+		int postNumber = ScannerUtil.nextInt("게시글 번호: ");
 			
-			if (postNumber < 0 || postNumber > posts.size()) {
-				System.out.println("존재하지 않는 게시글 번호입니다.");
-				return; 
-			}
+		if (postNumber < 0 || postNumber >= posts.size()) {
+			System.out.println("존재하지 않는 게시글 번호입니다.");
+			return; 
+		}
 				
-			post = posts.get(postNumber);
+		post = posts.get(postNumber);
 			
-			if (post.isPublished()) {
-				System.out.println("이미 발행된 게시글입니다.");
-				return;
-			}
+		if (post.isPublished()) {
+			System.out.println("이미 발행된 게시글입니다.");
+			return;
+		}
 			
-			post.publish();
-			System.out.println("게시글이 발행되었습니다.");
-			}
+		post.publish();
+		System.out.println("게시글이 발행되었습니다.");
+	}
 			     
-		 }
-
-
 	@Override
 	public void like() {
 		// TODO 최형선
@@ -122,7 +120,11 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public Post getPost(User blogOwner, int index) {
 		// TODO 엄예진
-		return null;
+		List<Post> posts = blogOwner.getPostList();
+		if (index < 0 || index >= posts.size()) {
+			return null;
+		}
+		return posts.get(index);
 	}
 
 }
