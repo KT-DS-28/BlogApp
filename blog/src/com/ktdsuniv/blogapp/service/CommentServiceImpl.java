@@ -6,6 +6,7 @@ import com.ktdsuniv.blogapp.domain.Comment;
 import com.ktdsuniv.blogapp.domain.Post;
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.BlogException;
+import com.ktdsuniv.blogapp.exception.NotLoggedInException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
 
@@ -81,6 +82,75 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public void likeComment() {
 		// TODO 엄예진
+		if (!Session.isLoggedIn()) {
+			throw new NotLoggedInException();
+		}
+		
+	    User user = Session.getLoginUser();
+	    postService.showPostList();
+	    
+	    // 블로그 선택
+	    System.out.println("좋아요를 하고싶은 블로그를 번호로 입력하세요.");
+		List<User> users = userService.getAllUsers();
+	    for (int i = 0; i < users.size(); i++) {
+	        System.out.println(i + ". " + users.get(i).getBlogName());
+	    }
+	    
+	    int userIndex = ScannerUtil.nextInt("블로그 번호: ");
+	    if (userIndex < 0 || userIndex >= users.size()) {
+	        throw new BlogException("존재하지 않는 블로그입니다.");
+	    }
+	    User blogOwner = users.get(userIndex);
+	    
+	    //게시글 선택
+	    List<Post> posts = postService.getPostList(blogOwner);
+	    Post post = null;
+		for (int i = 0; i < posts.size(); i++) {
+			post = posts.get(i);
+			if (post.isPublished()) {
+				System.out.println(i + "." + posts.get(i).getTitle());
+			}
+		}
+		int postIndex = ScannerUtil.nextInt("게시글 번호: ");
+		if (postIndex < 0 || postIndex > posts.size()) {
+			System.out.println("존재하지 않는 게시글 번호입니다.");
+			return; 
+		}
+		
+		// 댓글 선택
+		List<Comment> comments = post.getComments();
+		if (comments.size() == 0) {
+			System.out.println("댓글이 없습니다.");
+		    return;
+		}
+		 
+		//0. 사용자명: 댓글 내용 (댓글 작성 날짜, 댓글 좋아요 수)
+		Comment comment = null;
+		for (int i = 0; i < comments.size(); i++) {
+			comment = comments.get(i);
+		    System.out.println(i + ". " + comment.getAuthor().getName() + 
+		    		 " : " + comment.getContent() + " (" + comment.getAddTime() + 
+		    		 ", " + comment.getLikeUsers().size() + ")");
+		}
+		int commentIndex = ScannerUtil.nextInt("좋아요를 하고 싶은 댓글 번호를 입력하세요. ");
+		if (commentIndex < 0 || commentIndex >= comments.size()) {
+		    throw new BlogException("존재하지 않는 댓글입니다.");
+		}
+		comment = comments.get(commentIndex);
+		
+		//해당 댓글의 Like<User> 리스트에 사용자를 추가
+		if (comment.getAuthor() == user) {
+			System.out.println("자신이 작성한 댓글에는 좋아요를 할 수 없습니다.");
+			return;
+		}
+		
+		if(comment.getLikeUsers().contains(user)) {
+			System.out.println("한번 좋아요를 한 댓글에는 중복해서 좋아요를 할 수 없습니다.");
+			return;
+		}
+		
+		comment.getLikeUsers().add(user);
+		System.out.println("좋아요를 눌렀습니다.");
 	}
 
 }
