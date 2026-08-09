@@ -1,8 +1,10 @@
 package com.ktdsuniv.blogapp.service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ktdsuniv.blogapp.domain.Comment;
 import com.ktdsuniv.blogapp.domain.Post;
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.BlogException;
@@ -84,6 +86,77 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public void showPostDetail() {
 		// TODO 엄예진
+		User user = null; // null 허용
+		if (Session.isLoggedIn()) {
+			user = Session.getLoginUser();
+		}
+		
+		String ownerId = ScannerUtil.nextLine("블로그 아이디: ").trim();
+		if (ownerId == null || ownerId.isBlank()) {
+			throw new BlogException("존재하지 않는 아이디입니다.");
+		}
+		
+		User blogOwner = userService.findById(ownerId);
+		if (blogOwner == null) {
+			throw new BlogException("존재하지 않는 아이디입니다.");
+		}
+		
+		List<Post> posts = getPostList(blogOwner);
+		if (posts.size() == 0) {
+			System.out.println("조회할 게시글이 없습니다.");
+			return;
+		}
+		
+		int index = ScannerUtil.nextInt("조회할 게시글 번호: ");
+		if (index < 0 || index >= posts.size()) {
+			System.out.println("존재하지 않는 게시글입니다.");
+			return;
+		}
+		
+		Post post = posts.get(index);
+		boolean isOwner = false;
+		
+		if (user != null && user == blogOwner) {
+			isOwner = true;
+		}
+		
+		if (!isOwner && !post.isPublished()) {
+			System.out.println("미발행 게시글은 조회할 수 없습니다.");
+			return;
+		}
+		
+		// 조회수 증가
+		if(user != null && !post.getViewedUsers().contains(user)) {
+			post.getViewedUsers().add(user);
+		}
+		
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd, HH:mm:ss");
+		
+		System.out.println("게시글 번호: " + index);
+		System.out.println("게시글 제목: " + post.getTitle());
+		System.out.println("댓글 수: " + post.getComments().size());
+		System.out.println("좋아요 수: " + post.getLikeUsers().size());
+		System.out.println("조회 수: " + post.getViewedUsers().size());
+		System.out.println("게시 날짜: " + post.getPublishTime().format(format));
+		System.out.println("내용: " + post.getContent());
+		
+		System.out.println("조회한 사용자 목록: ");
+		for (User viewUser : post.getViewedUsers()) {
+			System.out.println(viewUser.getName());
+		}
+		
+		System.out.println("좋아요 한 사용자 목록: ");
+		for (User likeUser : post.getLikeUsers()) {
+			System.out.println(likeUser.getName());
+		}
+		
+		System.out.println("댓글 목록: ");
+		for(Comment comment: post.getComments()) {
+			System.out.println(comment.getAuthor().getName() +": " + 
+		comment.getContent() + " (작성 날짜: " + comment.getAddTime().format(format) + ", 좋아요 수: " + 
+					comment.getLikeUsers().size() + ")");
+		}
+		
 	}
 
 	@Override
