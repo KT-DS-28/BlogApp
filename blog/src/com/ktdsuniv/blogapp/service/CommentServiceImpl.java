@@ -116,8 +116,44 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public void deleteComment() {
-		// TODO 김경환
+		if (!Session.isLoggedIn()) {
+			throw new NotLoggedInException();
+		}
+		User loginUser = Session.getLoginUser();
+
+		postService.showPostList();
+		int postNumber = ScannerUtil.nextInt("게시물을 선택하세요.: ");
+		Post post = postService.getPost(loginUser, postNumber);
+
+		if (post == null) {
+			throw new NotFoundException("게시글");
+		}
+
+		if (post.getComments().isEmpty()) {
+			throw new BlogException("등록된 댓글이 없습니다.");
+		}
+
+		postService.showPostDetail();
+		int commentNumber = ScannerUtil.nextInt("삭제할 댓글을 선택하세요.: ");
+
+		if (commentNumber < 0 || commentNumber >= post.getComments().size()) {
+			throw new NotFoundException("댓글");
+		}
+
+		Comment comment = post.getComments().get(commentNumber);
+
+		if (!comment.getAuthor().getId().equals(loginUser.getId())) {
+			throw new AccessDeniedException();
+		}
+
+		if (!comment.getLikeUsers().isEmpty()) {
+			throw new LikedCommentException();
+		}
+
+		post.getComments().remove(commentNumber);
+		System.out.println("댓글이 삭제되었습니다.");
 	}
+		
 
 	@Override
 	public void likeComment() {
