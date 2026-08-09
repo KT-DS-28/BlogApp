@@ -3,6 +3,8 @@ package com.ktdsuniv.blogapp.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ktdsuniv.blogapp.domain.Comment;
+import com.ktdsuniv.blogapp.domain.Post;
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.BlogException;
 import com.ktdsuniv.blogapp.exception.DuplicateUserIdException;
@@ -113,13 +115,36 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void withdraw() {
-		// TODO 최형선
-
+		
 		// 로그인한 사용자 정보는 Session 이 가지고 있다.
 		User user = Session.getLoginUser();
 		
 		// 유저 삭제 후에 출력 메시지를 위한 임시 변수.
 		String userName = user.getName();
+		
+		// 유저가 남긴 데이터를 전부 지운다. 
+		for (User anotherUser : USERS) {
+			
+			// 순회중 자기 자신의 글은 넘어간다.
+			if (anotherUser == user) {
+				continue;
+			}
+			
+			// 게시물 순회 시작.
+			for (Post post : anotherUser.getPostList()) {
+				
+				// 다른 사람의 게시물에 남긴 댓글 제거.
+				post.getComments().removeIf(comment -> comment.getAuthor() == user);
+				
+				// 내가 남긴 다른 사람 게시물 좋아요 제거.
+				post.getLikeUsers().remove(user);
+					
+				// 다른 사람 댓글의 좋아요 제거.
+				for (Comment comment : post.getComments()) {
+					comment.getLikeUsers().remove(user);
+				}
+			}
+		}
 		
 		// getLoginUser 에서 NotLoggedInException 에서 이미 처리중이기때문에 
 		// 로그인 하지 않은 상황에 대한 추가 예외처리를 하지 않아도 된다.
