@@ -6,8 +6,10 @@ import java.util.List;
 import com.ktdsuniv.blogapp.domain.Post;
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.BlogException;
+import com.ktdsuniv.blogapp.exception.DuplicateLikeException;
 import com.ktdsuniv.blogapp.exception.NotFoundException;
 import com.ktdsuniv.blogapp.exception.NotLoggedInException;
+import com.ktdsuniv.blogapp.exception.SelfLikeException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
 
@@ -25,6 +27,8 @@ public class PostServiceImpl implements PostService {
 	public PostServiceImpl() {
 		this.userService = new UserServiceImpl();
 	}
+	
+	
 
 	// ================= 메뉴 기능 =================
 
@@ -136,6 +140,71 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public void like() {
 		// TODO 최형선
+		
+		
+		// 로그인 상태 확인.
+		if (!Session.isLoggedIn()) {
+			throw new NotLoggedInException();
+		}
+		
+		User user = Session.getLoginUser();
+		// 블로그 선택
+	    System.out.println("좋아요 할 글이 있는 블로그를 번호로 입력하세요.");
+	    
+	    // 모든 게시판 사용자 리스트.
+		List<User> users = userService.getAllUsers();
+		
+		// 선택 대상 출력.
+	    for (int i = 0; i < users.size(); i++) {
+	    	System.out.println(i + ". " + users.get(i).getBlogName());
+	    }
+	    
+	    int userIndex = ScannerUtil.nextInt("블로그 번호: ");
+	    
+	    // 없는 번호의 블로그를 선택하면 에러 발생.
+	    if (userIndex < 0 || userIndex >= users.size()) {
+	    	throw new BlogException("존재하지 않는 블로그입니다.");
+	    }
+	    
+	    
+	    User blogOwner = users.get(userIndex);
+	    
+	    //게시글 선택
+	    List<Post> posts = getPostList(blogOwner);
+	    
+	    
+	    // 선택한 블로그에 게시물이 없으면 종료
+	    if (posts.isEmpty()) {
+	    	throw new BlogException("선택한 블로그에는 게시물이 없습니다.");
+	    }
+	    
+	    // 좋아요 할 대상 리스트 출력.
+		for (int i = 0; i < posts.size(); i++) {
+			System.out.println(i + "." + posts.get(i).getTitle());
+		}
+		
+		System.out.println("좋아요 할 게시글 번호를 선택 해 주세요.");
+		
+		int postIndex = ScannerUtil.nextInt("게시글 번호: ");
+		
+		if (postIndex < 0 || postIndex >= posts.size()) {
+			throw new BlogException("존재하지 않는 게시글 번호입니다.");
+		} 
+		
+		Post post = posts.get(postIndex);
+		
+		if (post.getAuthor() == user) {
+			throw new SelfLikeException();
+		}
+		
+		if (post.getLikeUsers().contains(user)) {
+			throw new DuplicateLikeException();
+		}
+		
+		post.getLikeUsers().add(user);
+		
+		System.out.println("좋아요를 했습니다.");
+		
 	}
 
 	// ============ 다른 기능에서 사용하는 조회 ============
