@@ -60,7 +60,7 @@ public class PostServiceImpl implements PostService {
 			System.out.println("게시글이 없습니다.");
 			return;
 		}
-		System.out.println(blogOwner.getBlogName() +"님의 블로");
+		System.out.println(blogOwner.getBlogName() +"님의 블로그");
 		for(int i=0; i<posts.size(); i++) {
 			Post post =posts.get(i);
 			System.out.println(i+"."+post.getTitle() +
