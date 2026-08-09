@@ -3,7 +3,10 @@ package com.ktdsuniv.blogapp.service;
 import com.ktdsuniv.blogapp.domain.Comment;
 import com.ktdsuniv.blogapp.domain.Post;
 import com.ktdsuniv.blogapp.domain.User;
+import com.ktdsuniv.blogapp.exception.AccessDeniedException;
 import com.ktdsuniv.blogapp.exception.BlogException;
+import com.ktdsuniv.blogapp.exception.LikedCommentException;
+import com.ktdsuniv.blogapp.exception.NotFoundException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
 
@@ -24,26 +27,44 @@ public class CommentServiceImpl implements CommentService {
 
 	@Override
 	public void updateComment() {
-		User author = Session.getLoginUser();
+		User loginUser = Session.getLoginUser();
 
 		postService.showPostList();
 		int postNumber = ScannerUtil.nextInt("게시물을 선택하세요.: ");
-		Post post = postService.getPost(author, postNumber);
-// 댓글 개수
-		if(post.getComments().isEmpty()) {
-			throw new BlogException("내용은 필수로 입력해야 합니다.");
+		Post post = postService.getPost(loginUser, postNumber);
+
+		if (post == null) {
+			throw new NotFoundException("게시글");
 		}
+
+		if (post.getComments().isEmpty()) {
+			throw new BlogException("등록된 댓글이 없습니다.");
+		}
+
 		postService.showPostDetail();
 		int commentNumber = ScannerUtil.nextInt("수정할 댓글을 선택하세요.: ");
+
+		if (commentNumber < 0 || commentNumber >= post.getComments().size()) {
+			throw new NotFoundException("댓글");
+		}
+
 		Comment comment = post.getComments().get(commentNumber);
-// 좋아요확인
+
+		if (!comment.getAuthor().getId().equals(loginUser.getId())) {
+			throw new AccessDeniedException();
+		}
+
+		if (!comment.getLikeUsers().isEmpty()) {
+			throw new LikedCommentException();
+		}
+
 		String content = ScannerUtil.nextLine("수정 내용을 입력하세요: ").trim();
 		if (content.isBlank()) {
 			throw new BlogException("내용은 필수로 입력해야 합니다.");
 		}
-//		Post post = new Post(author, title, content);
-//		author.getPostList().add(post);
-//		System.out.println("게시글이 등록되었습니다.");
+
+		comment.setContent(content);
+		System.out.println("댓글이 수정되었습니다.");
 	}
 
 	@Override
