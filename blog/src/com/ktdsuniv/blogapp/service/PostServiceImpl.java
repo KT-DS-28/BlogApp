@@ -152,7 +152,12 @@ public class PostServiceImpl implements PostService {
 		System.out.println("댓글 수: " + post.getComments().size());
 		System.out.println("좋아요 수: " + post.getLikeUsers().size());
 		System.out.println("조회 수: " + post.getViewedUsers().size());
-		System.out.println("게시 날짜: " + post.getPublishTime().format(format));
+		// 미발행 글은 publishTime 이 null 이므로 그대로 format 하면 NPE 가 난다.
+		if (post.isPublished()) {
+			System.out.println("게시 날짜: " + post.getPublishTime().format(format));
+		} else {
+			System.out.println("게시 날짜: 미발행");
+		}
 		System.out.println("내용: " + post.getContent());
 		
 		System.out.println("조회한 사용자 목록: ");
@@ -298,9 +303,13 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public List<Post> getPostList(User blogOwner) {
 		// TODO 김경환
-		User loginUser = Session.getLoginUser();
+		// getLoginUser 는 비로그인 상태에서 예외를 던지므로, 조회는 로그인 없이도 되도록 isLoggedIn 으로 확인한다.
+		User loginUser = null;
+		if (Session.isLoggedIn()) {
+			loginUser = Session.getLoginUser();
+		}
 		List<Post> allPosts = blogOwner.getPostList();
-		// 본인이 자기 블로그를 보는 경우 -> 전체 반환 
+		// 본인이 자기 블로그를 보는 경우 -> 전체 반환
 		if (loginUser != null && loginUser.equals(blogOwner)) {
 			return allPosts;
 		} else {
