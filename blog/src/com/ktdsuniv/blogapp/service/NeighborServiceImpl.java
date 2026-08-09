@@ -95,17 +95,27 @@ public class NeighborServiceImpl implements NeighborService {
 			System.out.println(i + ". 이웃 신청: " + neighbor.getRequester().getName());
 		}
 
-		System.out.println("이웃을 맺고 싶은 번호를 입력하세요.");
-		int acceptNumber = ScannerUtil.nextInt("이웃 수락 번호: ");
-		if (acceptNumber < 0 || acceptNumber > pendingNeighbors.size() - 1) {
+		int number = ScannerUtil.nextInt("처리할 번호를 입력하세요: ");
+		if (number < 0 || number >= pendingNeighbors.size()) {
 			System.out.println("잘못된 번호입니다.");
 			return;
 		}
 
-		Neighbor AcceptNeighbor = pendingNeighbors.get(acceptNumber);
-		AcceptNeighbor.setState(NeighborState.ACCEPTED);
-		System.out.println("이웃을 맺었습니다.");
-
+		neighbor = pendingNeighbors.get(number);
+		// 수락
+		int answer = ScannerUtil.nextInt("수락은 1번, 거절은 2번을 숫자로 입력하세요.: ");
+		if (answer == 1) {
+			neighbor.setState(NeighborState.ACCEPTED);
+			System.out.println("이웃 신청을 수락했습니다.");
+		// 거절
+		} else if (answer == 2) {
+			neighbor.getRequester().getNeighbors().remove(neighbor);
+			neighbor.getReceiver().getNeighbors().remove(neighbor);
+			System.out.println("이웃 신청을 거부했습니다.");
+		} else {
+			System.out.println("잘못 입력하셨습니다.");
+			return;
+		}
 	}
 
 	@Override
