@@ -130,6 +130,61 @@ public class NeighborServiceImpl implements NeighborService {
 	@Override
 	public void removeNeighbor() {
 		// TODO 최미서
+		// 로그인 유무 확인
+		User user = Session.getLoginUser();
+		// 현재 Accepted상태인 이웃만 보여주기
+		List<Neighbor> neighbors = new ArrayList<>();
+		
+		for (Neighbor neighbor : user.getNeighbors()) {
+			if (neighbor.getState() == NeighborState.ACCEPTED) {
+				neighbors.add(neighbor);
+			}
+		}
+		// 이웃이 없을 경우
+		if (neighbors.isEmpty()) {
+			
+		}
+		
+		// 이웃 출력하기 
+		for (int i = 0; i < neighbors.size(); i++) {
+			Neighbor neighbor = neighbors.get(i);
+			
+			User neighborUser = null;
+			// neighbor에 있는 receiver가 본인인지 확인
+			if(neighbor.getReceiver() == user ) {
+				neighborUser = neighbor.getRequester();
+			} else {
+				neighborUser = neighbor.getReceiver();
+			}
+			System.out.println(i + ". 이웃의 이름: " +neighborUser.getName() + 
+					", 블로그 명: " + neighborUser.getBlogName() );
+		}
+		
+		int neighborIndex = ScannerUtil.nextInt("해제할 이웃의 번호를 입력해주세요. 번호: ");
+		// 번호 존재 유무확인
+ 
+		if (neighborIndex < 0 || neighborIndex >= neighbors.size()) {
+			 throw new BlogException("잘못된 이웃 번호입니다.");
+		}
+		// 선택한 이웃 가져오기
+		Neighbor selectedneighbor = neighbors.get(neighborIndex);
+		
+		//neighbor의 유저에서 본인이 아닌쪽이 receiver인지 requester인지 확인
+		User neighbor = null;
+		if (selectedneighbor.getReceiver() == user) {
+			neighbor = selectedneighbor.getRequester();
+		} else {
+			neighbor = selectedneighbor.getReceiver();
+		}
+		// 양쪽에서 이웃 해제하기
+		user.getNeighbors().remove(selectedneighbor);
+		neighbor.getNeighbors().remove(selectedneighbor);
+		
+		System.out.println(neighbor.getName() + "님과 이웃이 해제되었습니다.");
+		
+		
+		
+
 	}
 
 	// ============ 다른 기능에서 사용하는 조회 ============
