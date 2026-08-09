@@ -55,14 +55,14 @@ public class NeighborServiceImpl implements NeighborService {
 		if (receiverId.equals(requester.getId())) {
 			throw new BlogException("본인에게는 이웃 신청을 할 수 없습니다.");
 		}
-		// 신청 대상 아이디로 user 가져오기 
+		// 신청 대상 아이디로 user 가져오기
 		User receiver = userService.findById(receiverId);
 		if (receiver == null) {
 			throw new NotFoundException("존재하지 않는 아이디입니다");
 		}
 		// 이웃 인스턴스 하나 생성
 		Neighbor neighbor = new Neighbor(requester, receiver);
-		
+
 		// 양쪽 리스트에 같은 객체 추가
 		requester.getNeighbors().add(neighbor);
 		receiver.getNeighbors().add(neighbor);
@@ -77,10 +77,10 @@ public class NeighborServiceImpl implements NeighborService {
 			throw new NotLoggedInException();
 		}
 		User user = Session.getLoginUser();
-		
+
 		List<Neighbor> pendingNeighbors = new ArrayList<>();
 		for (Neighbor neighbor : user.getNeighbors()) {
-			if(user == neighbor.getReceiver() && neighbor.getState() == NeighborState.PENDING) {
+			if (user == neighbor.getReceiver() && neighbor.getState() == NeighborState.PENDING) {
 				pendingNeighbors.add(neighbor);
 			}
 		}
@@ -88,29 +88,43 @@ public class NeighborServiceImpl implements NeighborService {
 			System.out.println("이웃 신청 목록이 비어있습니다.");
 			return;
 		}
-		
+
 		Neighbor neighbor = null;
-		for (int  i = 0; i < pendingNeighbors.size(); i++) {
+		for (int i = 0; i < pendingNeighbors.size(); i++) {
 			neighbor = pendingNeighbors.get(i);
 			System.out.println(i + ". 이웃 신청: " + neighbor.getRequester().getName());
 		}
-		
+
 		System.out.println("이웃을 맺고 싶은 번호를 입력하세요.");
 		int acceptNumber = ScannerUtil.nextInt("이웃 수락 번호: ");
 		if (acceptNumber < 0 || acceptNumber > pendingNeighbors.size() - 1) {
 			System.out.println("잘못된 번호입니다.");
 			return;
 		}
-		
+
 		Neighbor AcceptNeighbor = pendingNeighbors.get(acceptNumber);
 		AcceptNeighbor.setState(NeighborState.ACCEPTED);
 		System.out.println("이웃을 맺었습니다.");
-		
+
 	}
 
 	@Override
 	public void showNeighbors() {
-		// TODO 류지훈
+		if (!Session.isLoggedIn()) {
+			throw new NotLoggedInException();
+		}
+		User loginedUser = Session.getLoginUser();
+
+		List<User> userList = getNeighbors(loginedUser);
+
+		if (userList.isEmpty()) {
+			System.out.println("이웃이 존재하지 않습니다.");
+			return;
+		}
+
+		for (int i = 0; i < userList.size(); ++i) {
+			System.out.println((i + 1) + ": " + userList.get(i));
+		}
 	}
 
 	@Override
@@ -122,8 +136,11 @@ public class NeighborServiceImpl implements NeighborService {
 
 	@Override
 	public List<User> getNeighbors(User user) {
-		// TODO 류지훈
-		return new ArrayList<>();
+		List<User> userList = new ArrayList<>();
+		for (Neighbor neighbor : user.getNeighbors()) {
+			userList.add(neighbor.getOther(user));
+		}
+		return userList;
 	}
 
 }
