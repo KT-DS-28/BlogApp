@@ -10,6 +10,7 @@ import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.BlogException;
 import com.ktdsuniv.blogapp.exception.DuplicateUserIdException;
 import com.ktdsuniv.blogapp.exception.LoginBlockedException;
+import com.ktdsuniv.blogapp.exception.LoginFailedException;
 import com.ktdsuniv.blogapp.exception.NotFoundException;
 import com.ktdsuniv.blogapp.exception.NotLoggedInException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
@@ -70,37 +71,32 @@ public class UserServiceImpl implements UserService {
 			throw new NotFoundException("사용자");
 		} 
 		
-		String password = null;
-		
-		for (int i = 0; i < 10; i++) {
-			password= ScannerUtil.nextLine("비밀번호:").trim();
-			// 사용자의 비밀번호가 일치
-			 if (user.getPassword().equals(password)) {
-				 	//세션에 유저정보 저장
-					Session.login(user);
-					// 로그인 시도횟수 초기화
-					user.resetLoginTryCount();
-					System.out.println(user.getName() + "로그인 되었습니다.");
-					return;
-				// 비밀번호가 일치 하지않는다.
-				} else {
-					// 로그인 시도횟수 증가
-					user.increaseLoginTryCount();
-					System.out.println("비밀번호가 올바르지 않습니다. "
-							+ "(남은 시도 " +(10 - user.getLoginTryCount())  + "회)");
-				}
-			 
-		}
-		// 로그인시도 횟수가 10회 이상이라면
+		// 로그인시도 차단 횟수가 10회 이상이라면
 		if(user.isLoginBlocked()) {
-			// 로그인 시도횟수 초기화
-			user.resetLoginTryCount();
 			throw new LoginBlockedException();	
 		}
+		String password = null;
+		
+		password= ScannerUtil.nextLine("비밀번호:").trim();
 		
 		
-		
-	}
+		// 사용자의 비밀번호가 일치
+		if (user.getPassword().equals(password)) {
+		 	//세션에 유저정보 저장
+			Session.login(user);
+			// 로그인 시도횟수 초기화
+			user.resetLoginTryCount();
+			System.out.println(user.getName() + "로그인 되었습니다.");
+			
+			return;
+			
+			// 비밀번호가 일치 하지않는다.
+			} else {
+				// 로그인 시도횟수 증가
+				user.increaseLoginTryCount();
+				throw new LoginFailedException(user.getMaxLoginTryLimit()-user.getLoginTryCount());
+			}
+		}
 
 	@Override
 	public void logout() {

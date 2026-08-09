@@ -8,6 +8,7 @@ import com.ktdsuniv.blogapp.domain.Neighbor;
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.enums.NeighborState;
 import com.ktdsuniv.blogapp.exception.BlogException;
+import com.ktdsuniv.blogapp.exception.DuplicateNeighborRequestException;
 import com.ktdsuniv.blogapp.exception.NotFoundException;
 import com.ktdsuniv.blogapp.exception.NotLoggedInException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
@@ -37,12 +38,6 @@ public class NeighborServiceImpl implements NeighborService {
 				continue;
 			}
 
-			// 이미 대기중이거나 이웃인애들은 패스
-			if (requester.getNeighbors().contains(currUser)) {
-				continue;
-			}
-
-			//
 			System.out.println("(" + (i + 1) + ") ID: " + currUser.getId() + ", 이름: " + currUser.getName() + ", 블로그명: "
 					+ currUser.getBlogName());
 			// (1) ID: " ", 이름: " ", 블로그명: " "
@@ -60,9 +55,17 @@ public class NeighborServiceImpl implements NeighborService {
 		if (receiver == null) {
 			throw new NotFoundException("존재하지 않는 아이디입니다");
 		}
+		
+		if (requester.getNeighbors().stream() // Stream<Neighbor>
+				.anyMatch(neighbor -> neighbor.getOther(requester) == receiver)) {
+					
+					throw new DuplicateNeighborRequestException();
+					
+				}
+		
 		// 이웃 인스턴스 하나 생성
 		Neighbor neighbor = new Neighbor(requester, receiver);
-
+		
 		// 양쪽 리스트에 같은 객체 추가
 		requester.getNeighbors().add(neighbor);
 		receiver.getNeighbors().add(neighbor);
@@ -152,7 +155,7 @@ public class NeighborServiceImpl implements NeighborService {
 		}
 		// 이웃이 없을 경우
 		if (neighbors.isEmpty()) {
-			
+			throw new BlogException("아직 이웃이 없습니다.");
 		}
 		
 		// 이웃 출력하기 

@@ -2,6 +2,7 @@ package com.ktdsuniv.blogapp.service;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.ktdsuniv.blogapp.domain.Comment;
@@ -51,7 +52,22 @@ public class PostServiceImpl implements PostService {
 			throw new BlogException("내용은 필수로 입력해야 합니다.");
 		}
 		
+		String tags = ScannerUtil.nextLine("태그 ( , 로 구분): ").trim();
+		if (tags.isBlank()) {
+			throw new BlogException("태그는 필수로 입력해야 합니다.");
+		}
+		
+		
 		Post post = new Post(author, title, content);
+		
+		// 게시글이 생성되어야 리스트를 추가할수있다.
+		// 입력 받은 태그 목록을 정리하여 리스트로 바꾼 후 태그 필드에 넣어준다.
+		post.getTags().addAll(Arrays.stream(tags.split(",")) // Stream<Object>
+									.map(String::strip) // Stream<String>
+									.filter(tag -> !tag.isBlank()) // Stream<String>
+									.toList() // List<String>
+								);
+		
 		author.getPostList().add(post);
 		
 		System.out.println("게시글이 등록되었습니다.");
@@ -134,6 +150,7 @@ public class PostServiceImpl implements PostService {
 		
 		System.out.println("게시글 번호: " + index);
 		System.out.println("게시글 제목: " + post.getTitle());
+		System.out.println("게시글 태그: " + post.getTags());
 		System.out.println("댓글 수: " + post.getComments().size());
 		System.out.println("좋아요 수: " + post.getLikeUsers().size());
 		System.out.println("조회 수: " + post.getViewedUsers().size());
@@ -153,8 +170,8 @@ public class PostServiceImpl implements PostService {
 		System.out.println("댓글 목록: ");
 		for(Comment comment: post.getComments()) {
 			System.out.println(comment.getAuthor().getName() +": " + 
-		comment.getContent() + " (작성 날짜: " + comment.getAddTime().format(format) + ", 좋아요 수: " + 
-					comment.getLikeUsers().size() + ")");
+								comment.getContent() + " (작성 날짜: " + comment.getAddTime().format(format) + ", 좋아요 수: " + 
+								comment.getLikeUsers().size() + ")");
 		}
 		
 	}
@@ -212,8 +229,6 @@ public class PostServiceImpl implements PostService {
 			     
 	@Override
 	public void like() {
-		// TODO 최형선
-		
 		
 		// 로그인 상태 확인.
 		if (!Session.isLoggedIn()) {

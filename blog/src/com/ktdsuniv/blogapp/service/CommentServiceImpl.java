@@ -43,18 +43,27 @@ public class CommentServiceImpl implements CommentService {
 			throw new BlogException("존재하지 않는 블로그입니다.");
 		}
 
-		User blogOwner = users.get(userIndex);
-		// 블로그 사용자의 게시물 리스트 조회
-		List<Post> posts = postService.getPostList(blogOwner);
-		// 블로그 사용자의 게시글 제목 출력
-		for (int i = 0; i < posts.size(); i++) {
-			System.out.println(i + "." + posts.get(i).getTitle());
+		// 게시글 선택. 발행된 글만 보여준다.
+		List<Post> postList = users.get(userIndex).getPostList();
+		for (int i = 0; i < postList.size(); i++) {
+			if (postList.get(i).isPublished()) {
+				System.out.println(i + ". " + postList.get(i).getTitle());
+			}
 		}
+
 		// 게시글 번호 선택
 		int postIndex = ScannerUtil.nextInt("게시글 번호: ");
 
-		// 선택한 게시글 들고오기
-		Post post = postService.getPost(blogOwner, postIndex);
+		// 범위 검사를 먼저 해야 get 이 안전하다.
+		if (postIndex < 0 || postIndex >= postList.size()) {
+			throw new NotFoundException("게시글");
+		}
+
+		if (!postList.get(postIndex).isPublished()) {
+			throw new NotFoundException("게시글");
+		}
+
+		Post post = postList.get(postIndex);
 		// 댓글 입력받기
 		String content = ScannerUtil.nextLine("댓글 내용: ").trim();
 		// 댓글이 없을 경우
@@ -76,19 +85,51 @@ public class CommentServiceImpl implements CommentService {
 		}
 		User loginUser = Session.getLoginUser();
 
-		postService.showPostList();
-		int postNumber = ScannerUtil.nextInt("게시물을 선택하세요.: ");
-		Post post = postService.getPost(loginUser, postNumber);
-
-		if (post == null) {
-			throw new NotFoundException("게시글");
+		List<User> users = userService.getAllUsers();
+		
+		// 블로그 선택
+		for (int i = 0; i < users.size(); i++) {
+			System.out.println(i + ". " + users.get(i).getBlogName());
 		}
+		
+	    int blogNumber = ScannerUtil.nextInt("블로그를 번호로 입력하세요.: ");
+	    
+	    if (blogNumber < 0 || blogNumber >= users.size()) {
+	    	throw new BlogException("존재하지 않는 블로그입니다.");
+	    }
+	    
 
+	    List<Post> postList = users.get(blogNumber).getPostList();
+	    for (int i = 0 ; i < postList.size() ; i++) {
+	    	
+	    	if (postList.get(i).isPublished()) {
+				
+	    		System.out.println(i + ". " + postList.get(i).getTitle());
+			}
+		}
+	    
+	    int postIndex = ScannerUtil.nextInt("포스트 번호: ");
+	    
+	    
+	    if (postIndex < 0 || postIndex >= postList.size()) {
+	    	throw new NotFoundException("게시글");
+	    } 
+	    
+	    if (!postList.get(postIndex).isPublished()) {
+	    	throw new NotFoundException("게시글");
+	    } 
+
+		Post post = postList.get(postIndex);
+		
 		if (post.getComments().isEmpty()) {
-			throw new BlogException("등록된 댓글이 없습니다.");
+			throw new BlogException("이 게시글에는 아직 댓글이 없습니다.");
+		}
+		
+		
+		for (int i = 0 ; i < post.getComments().size() ; i++) {
+	    	 System.out.println(i + ". " + post.getComments().get(i).getContent());
 		}
 
-		postService.showPostDetail();
 		int commentNumber = ScannerUtil.nextInt("수정할 댓글을 선택하세요.: ");
 
 		if (commentNumber < 0 || commentNumber >= post.getComments().size()) {
@@ -121,19 +162,49 @@ public class CommentServiceImpl implements CommentService {
 		}
 		User loginUser = Session.getLoginUser();
 
-		postService.showPostList();
-		int postNumber = ScannerUtil.nextInt("게시물을 선택하세요.: ");
-		Post post = postService.getPost(loginUser, postNumber);
+		List<User> users = userService.getAllUsers();
 
-		if (post == null) {
+		// 블로그 선택
+		for (int i = 0; i < users.size(); i++) {
+			System.out.println(i + ". " + users.get(i).getBlogName());
+		}
+
+		int blogNumber = ScannerUtil.nextInt("블로그를 번호로 입력하세요.: ");
+
+		if (blogNumber < 0 || blogNumber >= users.size()) {
+			throw new BlogException("존재하지 않는 블로그입니다.");
+		}
+
+		// 게시글 선택. 발행된 글만 보여준다.
+		List<Post> postList = users.get(blogNumber).getPostList();
+		for (int i = 0; i < postList.size(); i++) {
+			if (postList.get(i).isPublished()) {
+				System.out.println(i + ". " + postList.get(i).getTitle());
+			}
+		}
+
+		int postIndex = ScannerUtil.nextInt("포스트 번호: ");
+
+		// 범위 검사를 먼저 해야 get 이 안전하다.
+		if (postIndex < 0 || postIndex >= postList.size()) {
 			throw new NotFoundException("게시글");
 		}
 
-		if (post.getComments().isEmpty()) {
-			throw new BlogException("등록된 댓글이 없습니다.");
+		if (!postList.get(postIndex).isPublished()) {
+			throw new NotFoundException("게시글");
 		}
 
-		postService.showPostDetail();
+		Post post = postList.get(postIndex);
+
+		if (post.getComments().isEmpty()) {
+			throw new BlogException("이 게시글에는 아직 댓글이 없습니다.");
+		}
+
+		// 댓글 목록 출력
+		for (int i = 0; i < post.getComments().size(); i++) {
+			System.out.println(i + ". " + post.getComments().get(i).getContent());
+		}
+
 		int commentNumber = ScannerUtil.nextInt("삭제할 댓글을 선택하세요.: ");
 
 		if (commentNumber < 0 || commentNumber >= post.getComments().size()) {

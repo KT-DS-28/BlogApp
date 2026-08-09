@@ -62,6 +62,10 @@ public class User {
 	public int getLoginTryCount() {
 		return this.loginTryCount;
 	}
+	
+	public int getMaxLoginTryLimit() {
+		return MAX_LOGIN_TRY_COUNT;
+	}
 
 	@Override
 	public String toString() {
