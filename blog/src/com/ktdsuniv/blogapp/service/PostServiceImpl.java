@@ -6,6 +6,7 @@ import java.util.List;
 import com.ktdsuniv.blogapp.domain.Post;
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.BlogException;
+import com.ktdsuniv.blogapp.exception.NotFoundException;
 import com.ktdsuniv.blogapp.exception.NotLoggedInException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
@@ -46,6 +47,27 @@ public class PostServiceImpl implements PostService {
 	@Override
 	public void showPostList() {
 		// TODO 김경환
+		String id = ScannerUtil.nextLine("블로그 아이디: ").trim();
+		if (id.isBlank()) {
+			throw new BlogException("아이디는 필수로 입력해야 합니다.");
+		}
+		User blogOwner = userService.findById(id);
+		if(blogOwner == null) {
+			throw new NotFoundException("블로그를 찾을 수 없습니다.");
+		}
+		List<Post> posts = getPostList(blogOwner);
+		if (posts.isEmpty()) {
+			System.out.println("게시글이 없습니다.");
+			return;
+		}
+		System.out.println(blogOwner.getBlogName() +"님의 블로");
+		for(int i=0; i<posts.size(); i++) {
+			Post post =posts.get(i);
+			System.out.println(i+"."+post.getTitle() +
+					"댓글 :"+post.getComments().size()+"개"+
+					"좋아요 :"+post.getLikeUsers().size()+"개"+
+					"조회수 :" + post.getViewedUsers().size()+"개");
+		}
 	}
 
 	@Override
