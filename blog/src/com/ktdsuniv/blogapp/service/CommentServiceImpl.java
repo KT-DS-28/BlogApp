@@ -107,15 +107,16 @@ public class CommentServiceImpl implements CommentService {
 	    Post post = null;
 		for (int i = 0; i < posts.size(); i++) {
 			post = posts.get(i);
-			if (post.isPublished()) {
+			if (post.isPublished() || post.getAuthor() == user) {
 				System.out.println(i + "." + posts.get(i).getTitle());
 			}
 		}
 		int postIndex = ScannerUtil.nextInt("게시글 번호: ");
-		if (postIndex < 0 || postIndex > posts.size()) {
+		if (postIndex < 0 || postIndex >= posts.size()) {
 			System.out.println("존재하지 않는 게시글 번호입니다.");
 			return; 
 		}
+		post = posts.get(postIndex);
 		
 		// 댓글 선택
 		List<Comment> comments = post.getComments();
