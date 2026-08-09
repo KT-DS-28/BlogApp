@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.ktdsuniv.blogapp.domain.Comment;
+import com.ktdsuniv.blogapp.domain.Neighbor;
 import com.ktdsuniv.blogapp.domain.Post;
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.BlogException;
@@ -119,6 +120,14 @@ public class UserServiceImpl implements UserService {
 		// 로그인한 사용자 정보는 Session 이 가지고 있다.
 		User user = Session.getLoginUser();
 		
+		// 유저의 이웃 제거.
+		for (Neighbor neighbor : user.getNeighbors()) {
+			
+			// 이웃에서 상대방을 찾아서 그 상대방의 목록에서 이웃 맺음을 나타내는 객체를 지운다.
+			neighbor.getOther(user).getNeighbors().remove(neighbor);
+		
+		}
+		
 		// 유저 삭제 후에 출력 메시지를 위한 임시 변수.
 		String userName = user.getName();
 		
@@ -138,6 +147,9 @@ public class UserServiceImpl implements UserService {
 				
 				// 내가 남긴 다른 사람 게시물 좋아요 제거.
 				post.getLikeUsers().remove(user);
+				
+				// 내 조회 기록 삭제.
+				post.getViewedUsers().remove(user);
 					
 				// 다른 사람 댓글의 좋아요 제거.
 				for (Comment comment : post.getComments()) {
