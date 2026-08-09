@@ -63,4 +63,8 @@ public class User {
 		return this.loginTryCount;
 	}
 
+	@Override
+	public String toString() {
+		return "ID: " + this.getId() + ", 이름: " + this.getName() + ", 블로그명: " + this.getBlogName();
+	}
 }
