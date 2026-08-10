@@ -107,7 +107,7 @@ public class NeighborServiceImpl implements NeighborService {
 		if (answer == 1) {
 			neighbor.setState(NeighborState.ACCEPTED);
 			System.out.println("이웃 신청을 수락했습니다.");
-		// 거절
+			// 거절
 		} else if (answer == 2) {
 			neighbor.getRequester().getNeighbors().remove(neighbor);
 			neighbor.getReceiver().getNeighbors().remove(neighbor);
@@ -144,7 +144,7 @@ public class NeighborServiceImpl implements NeighborService {
 		User user = Session.getLoginUser();
 		// 현재 Accepted상태인 이웃만 보여주기
 		List<Neighbor> neighbors = new ArrayList<>();
-		
+
 		for (Neighbor neighbor : user.getNeighbors()) {
 			if (neighbor.getState() == NeighborState.ACCEPTED) {
 				neighbors.add(neighbor);
@@ -152,34 +152,33 @@ public class NeighborServiceImpl implements NeighborService {
 		}
 		// 이웃이 없을 경우
 		if (neighbors.isEmpty()) {
-			
+
 		}
-		
-		// 이웃 출력하기 
+
+		// 이웃 출력하기
 		for (int i = 0; i < neighbors.size(); i++) {
 			Neighbor neighbor = neighbors.get(i);
-			
+
 			User neighborUser = null;
 			// neighbor에 있는 receiver가 본인인지 확인
-			if(neighbor.getReceiver() == user ) {
+			if (neighbor.getReceiver() == user) {
 				neighborUser = neighbor.getRequester();
 			} else {
 				neighborUser = neighbor.getReceiver();
 			}
-			System.out.println(i + ". 이웃의 이름: " +neighborUser.getName() + 
-					", 블로그 명: " + neighborUser.getBlogName() );
+			System.out.println(i + ". 이웃의 이름: " + neighborUser.getName() + ", 블로그 명: " + neighborUser.getBlogName());
 		}
-		
+
 		int neighborIndex = ScannerUtil.nextInt("해제할 이웃의 번호를 입력해주세요. 번호: ");
 		// 번호 존재 유무확인
- 
+
 		if (neighborIndex < 0 || neighborIndex >= neighbors.size()) {
-			 throw new BlogException("잘못된 이웃 번호입니다.");
+			throw new BlogException("잘못된 이웃 번호입니다.");
 		}
 		// 선택한 이웃 가져오기
 		Neighbor selectedneighbor = neighbors.get(neighborIndex);
-		
-		//neighbor의 유저에서 본인이 아닌쪽이 receiver인지 requester인지 확인
+
+		// neighbor의 유저에서 본인이 아닌쪽이 receiver인지 requester인지 확인
 		User neighbor = null;
 		if (selectedneighbor.getReceiver() == user) {
 			neighbor = selectedneighbor.getRequester();
@@ -189,11 +188,8 @@ public class NeighborServiceImpl implements NeighborService {
 		// 양쪽에서 이웃 해제하기
 		user.getNeighbors().remove(selectedneighbor);
 		neighbor.getNeighbors().remove(selectedneighbor);
-		
+
 		System.out.println(neighbor.getName() + "님과 이웃이 해제되었습니다.");
-		
-		
-		
 
 	}
 
@@ -203,6 +199,9 @@ public class NeighborServiceImpl implements NeighborService {
 	public List<User> getNeighbors(User user) {
 		List<User> userList = new ArrayList<>();
 		for (Neighbor neighbor : user.getNeighbors()) {
+			if (neighbor.getState() == NeighborState.PENDING) {
+				continue;
+			}
 			userList.add(neighbor.getOther(user));
 		}
 		return userList;
