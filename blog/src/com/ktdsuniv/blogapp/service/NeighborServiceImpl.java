@@ -203,6 +203,9 @@ public class NeighborServiceImpl implements NeighborService {
 	public List<User> getNeighbors(User user) {
 		List<User> userList = new ArrayList<>();
 		for (Neighbor neighbor : user.getNeighbors()) {
+			if( neighbor.getState() == NeighborState.PENDING ) {
+				continue;
+			}
 			userList.add(neighbor.getOther(user));
 		}
 		return userList;
