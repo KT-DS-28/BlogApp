@@ -100,7 +100,7 @@ public class CommentServiceImpl implements CommentService {
 
 		Comment comment = commentList.get(commentNumber);
 
-		if (!comment.getAuthor().getId().equals(loginUser.getId())) {
+		if (!comment.getAuthor().equals(loginUser)) {
 			throw new AccessDeniedException();
 		}
 
