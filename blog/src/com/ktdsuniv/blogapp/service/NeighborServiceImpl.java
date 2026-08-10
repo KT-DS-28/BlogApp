@@ -125,7 +125,7 @@ public class NeighborServiceImpl implements NeighborService {
 		}
 		User loginedUser = Session.getLoginUser();
 
-		List<User> userList = getNeighbors(loginedUser);
+		List<User> userList = this.getNeighbors(loginedUser);
 
 		if (userList.isEmpty()) {
 			System.out.println("이웃이 존재하지 않습니다.");
