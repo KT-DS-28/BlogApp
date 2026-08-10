@@ -152,7 +152,8 @@ public class NeighborServiceImpl implements NeighborService {
 		}
 		// 이웃이 없을 경우
 		if (neighbors.isEmpty()) {
-
+			System.out.println("맺고있는 이웃이 없습니다.");
+			return;
 		}
 
 		// 이웃 출력하기
