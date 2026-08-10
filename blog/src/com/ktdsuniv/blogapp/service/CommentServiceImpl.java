@@ -132,18 +132,21 @@ public class CommentServiceImpl implements CommentService {
 			throw new NotFoundException("게시글");
 		}
 
-		if (post.getComments().isEmpty()) {
+		List<Comment> commentList = post.getComments();
+		if (commentList.isEmpty()) {
 			throw new BlogException("등록된 댓글이 없습니다.");
 		}
 
-		postService.showPostDetail();
+		for (int i = 0; i < commentList.size(); ++i) {
+			System.out.println(i + ". " + commentList.get(i));
+		}
 		int commentNumber = ScannerUtil.nextInt("삭제할 댓글을 선택하세요.: ");
 
-		if (commentNumber < 0 || commentNumber >= post.getComments().size()) {
+		if (commentNumber < 0 || commentNumber >= commentList.size()) {
 			throw new NotFoundException("댓글");
 		}
 
-		Comment comment = post.getComments().get(commentNumber);
+		Comment comment = commentList.get(commentNumber);
 
 		if (!comment.getAuthor().getId().equals(loginUser.getId())) {
 			throw new AccessDeniedException();
