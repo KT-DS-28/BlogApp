@@ -8,9 +8,11 @@ import com.ktdsuniv.blogapp.domain.Post;
 import com.ktdsuniv.blogapp.domain.User;
 import com.ktdsuniv.blogapp.exception.AccessDeniedException;
 import com.ktdsuniv.blogapp.exception.BlogException;
+import com.ktdsuniv.blogapp.exception.DuplicateLikeException;
 import com.ktdsuniv.blogapp.exception.LikedCommentException;
 import com.ktdsuniv.blogapp.exception.NotFoundException;
 import com.ktdsuniv.blogapp.exception.NotLoggedInException;
+import com.ktdsuniv.blogapp.exception.SelfLikeException;
 import com.ktdsuniv.blogapp.util.ScannerUtil;
 import com.ktdsuniv.blogapp.util.Session;
 
@@ -218,13 +220,11 @@ public class CommentServiceImpl implements CommentService {
 
 		// 해당 댓글의 Like<User> 리스트에 사용자를 추가
 		if (comment.getAuthor() == user) {
-			System.out.println("자신이 작성한 댓글에는 좋아요를 할 수 없습니다.");
-			return;
+			throw new SelfLikeException();
 		}
 
 		if (comment.getLikeUsers().contains(user)) {
-			System.out.println("한번 좋아요를 한 댓글에는 중복해서 좋아요를 할 수 없습니다.");
-			return;
+			throw new DuplicateLikeException();
 		}
 
 		comment.getLikeUsers().add(user);
